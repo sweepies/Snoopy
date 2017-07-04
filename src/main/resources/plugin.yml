@@ -28,7 +28,7 @@ commands:
     alises: [h]
 
 permissions:
-  snoopy.seeoremined:
+  snoopy.getnotified:
     description: Permission needed to receive the ore log messages
     default: op
   snoopy.reload:

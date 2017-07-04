@@ -82,7 +82,7 @@ public final class Snoopy extends JavaPlugin implements Listener {
                                     .replace("{light level}", Integer.toString(player.getLocation().getBlock().getLightLevel()));
 
                             for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (p.hasPermission("snoopy.seeoremined")) {
+                                if (p.hasPermission("snoopy.getnotified")) {
                                     p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
                                 }
                             }
