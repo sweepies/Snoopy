@@ -1,0 +1,41 @@
+name: Snoopy
+version: ${project.version}
+main: science.amberfall.snoopy.Snoopy
+prefix: Snoopy
+authors: [Sweepyoface]
+description: Alerts staff members for ore mined
+website: https://sweepy.pw/
+
+commands:
+  snoopy:
+    description: Snoopy parent command
+    usage: /snoopy
+    permission: snoopy.help
+  snoopy reload:
+    description: Reload the Snoopy config
+    usage: /snoopy reload
+    permission: snoopy.reload
+    aliases: [rl]
+  snoopy version:
+    description: See the Snoopy version
+    usage: /snoopy version
+    permission: snoopy.version
+    aliases: [ver]
+  snoopy help:
+    description: Show the Snoopy help
+    usage: /snoopy help
+    permission: snoopy.help
+    alises: [h]
+
+permissions:
+  snoopy.seeoremined:
+    description: Permission needed to receive the ore log messages
+    default: op
+  snoopy.reload:
+    description: Permission for reloading the configuration file
+    default: op
+  snoopy.help:
+    description: Permission for the help command
+    default: true
+
+
