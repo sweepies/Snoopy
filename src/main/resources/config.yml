@@ -1,8 +1,0 @@
-# The message format, acceptable placeholders are: {name} {amount} {type} {location} {light level}
-format: '&7[&3Snoopy&7] &3{name} found {amount} {type} at {location} (LL: {light level})'
-
-# The blocks that will trigger the message
-blocks:
- - 'DIAMOND_ORE'
- - 'GOLD_ORE'
- - 'EMERALD_ORE'
