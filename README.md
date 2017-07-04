@@ -13,3 +13,12 @@ Snoopy is a plugin that notifies staff members when certain blocks are mined. It
 | `/snoopy reload` (alias: /snoopy rl) | snoopy.reload | N/A | Reloads the configuration file. |
 | `/snoopy version` (alias: /snoopy ver) | snoopy.version | N/A | Prints the Snoopy version. |
 | N/A | snoopy.getnotified | N/A | The permission to be notified when a block is mined. |
+
+# Downloading
+You can download the latest build from [Jenkins](https://ci.amberfall.science/job/Snoopy/).
+
+# Building
+1. Install [Apache Maven](https://maven.apache.org/).
+2. Clone this repository.
+3. Run `mvn clean package`.
+4. The compiled jar will be in the `target` directory.
