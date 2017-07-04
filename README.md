@@ -6,6 +6,11 @@
 
 Snoopy is a plugin that notifies staff members when certain blocks are mined. It is mostly useful for detecting people using X-ray mods.
 
+By default, anyone with the `snoopy.getnotified` permission will be sent a message similar to the following:
+![Message screenshot](https://sweepyoface.github.io/Snoopy/message.png)
+
+It will also check for blocks that have been placed, and they won't be counted.
+
 # Commands
 | Command | Permission | Arguments | Description
 | --- | --- | --- | --- |
