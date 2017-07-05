@@ -17,6 +17,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashSet;
+import java.util.Map;
 
 public final class Snoopy extends JavaPlugin implements Listener {
 
@@ -67,19 +68,25 @@ public final class Snoopy extends JavaPlugin implements Listener {
                 Material type = block.getType();
                 Location location = block.getLocation();
 
-                for (String b : this.getConfig().getStringList("blocks")) {
-                    if (b.equals(type.toString())) {
+                for (Map m : this.getConfig().getMapList("blocks")) {
+                    if (m.get("type") != null && m.get("type").equals(type.toString())) {
                         if (!block.hasMetadata("snoopy_dontcount")) {
 
                             HashSet<Block> vein = new HashSet<>();
                             getVein(block.getType(), block, vein);
+                            int size = vein.size();
 
                             String message = this.getConfig().getString("format")
                                     .replace("{name}", player.getName())
                                     .replace("{amount}", Integer.toString(vein.size()))
-                                    .replace("{type}", type.toString())
                                     .replace("{location}", String.format("x: %s, y: %s, z: %s", location.getBlockX(), location.getBlockY(), location.getBlockZ()))
                                     .replace("{light level}", Integer.toString(player.getLocation().getBlock().getLightLevel()));
+
+                            if (size > 1) {
+                                message = message.replace("{type}", (String) m.get("pluralname"));
+                            } else {
+                                message = message.replace("{type}", (String) m.get("name"));
+                            }
 
                             for (Player p : Bukkit.getOnlinePlayers()) {
                                 if (p.hasPermission("snoopy.getnotified")) {
@@ -101,9 +108,8 @@ public final class Snoopy extends JavaPlugin implements Listener {
 
                 Block block = ev.getBlockPlaced();
                 Material type = block.getType();
-
-                for (String b : this.getConfig().getStringList("blocks")) {
-                    if (b.equals(type.toString())) {
+                for (Map m : this.getConfig().getMapList("blocks")) {
+                    if (m.get("type") != null && m.get("type").equals(type.toString())) {
                         if (!block.hasMetadata("snoopy_dontcount")) {
                             block.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
                         }

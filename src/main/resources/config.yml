@@ -1,8 +1,17 @@
 # The message format, acceptable placeholders are: {name} {amount} {type} {location} {light level}
 format: '&7[&3Snoopy&7] &3{name} found {amount} {type} at {location} (LL: {light level})'
 
-# The blocks that will trigger the message
+# The blocks that will trigger the message, and their corresponding friendly and plural name
 blocks:
- - 'DIAMOND_ORE'
- - 'GOLD_ORE'
- - 'EMERALD_ORE'
+  -
+    type: 'DIAMOND_ORE'
+    name: 'diamond'
+    pluralname: 'diamonds'
+  -
+    type: 'GOLD_ORE'
+    name: 'gold'
+    pluralname: 'gold'
+  -
+    type: 'EMERALD_ORE'
+    name: 'emerald'
+    pluralname: 'emeralds'
