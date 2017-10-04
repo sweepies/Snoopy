@@ -21,7 +21,7 @@ It will also check for blocks that have been placed, and they won't be counted.
 | N/A | snoopy.getnotified | N/A | The permission to be notified when a block is mined. |
 
 # Downloading
-You can download the latest build from [Jenkins](https://ci.amberfall.science/job/Snoopy/).
+You can download the latest build from [Jenkins](https://ci.sweepy.pw/job/Snoopy/).
 
 # Building
 1. Install [Apache Maven](https://maven.apache.org/).
