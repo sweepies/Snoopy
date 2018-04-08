@@ -41,14 +41,14 @@ public final class Snoopy extends JavaPlugin implements Listener {
      */
     private void getVein(Material type, Block anchor, HashSet<Block> collected) {
 
-        if (!anchor.getType().equals(type)) return;
-
-        if (collected.contains(anchor)) return; // Important! Prevents loop of death.
+        if (!anchor.getType().equals(type) || collected.contains(anchor)) return; // Break if already counted or wrong type of block
 
         collected.add(anchor); // Add this block (anchor) to collected list.
+
+        // Mark as already counted with metadata
         anchor.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
 
-        // Move to adjacent block and repeat the procedure by using this same method (recursion):
+        // Move to adjacent block and repeat the procedure by using this same method (recursion)
         getVein(type, anchor.getRelative(BlockFace.NORTH), collected);
         getVein(type, anchor.getRelative(BlockFace.SOUTH), collected);
         getVein(type, anchor.getRelative(BlockFace.EAST), collected);
@@ -60,7 +60,6 @@ public final class Snoopy extends JavaPlugin implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent ev) {
         if (!ev.isCancelled()) {
-
             if (ev.isDropItems()) {
 
                 Player player = ev.getPlayer();
@@ -76,23 +75,20 @@ public final class Snoopy extends JavaPlugin implements Listener {
                             getVein(block.getType(), block, vein);
                             int size = vein.size();
 
+                            // Replace placeholders in the message format from the config with values
                             String message = this.getConfig().getString("format")
                                     .replace("{name}", player.getName())
                                     .replace("{amount}", Integer.toString(vein.size()))
+                                    // If the vein is bigger than 1, pluralize the name of the ore
+                                    .replace("{type}", (String) m.get(size > 1 ? "pluralname" : "name"))
                                     .replace("{location}", String.format("x: %s, y: %s, z: %s", location.getBlockX(), location.getBlockY(), location.getBlockZ()))
                                     .replace("{light level}", Integer.toString(player.getLocation().getBlock().getLightLevel()));
 
-                            if (size > 1) {
-                                message = message.replace("{type}", (String) m.get("pluralname"));
-                            } else {
-                                message = message.replace("{type}", (String) m.get("name"));
-                            }
-
-                            for (Player p : Bukkit.getOnlinePlayers()) {
+                            Bukkit.getOnlinePlayers().forEach(p -> {
                                 if (p.hasPermission("snoopy.getnotified")) {
                                     p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
                                 }
-                            }
+                            });
                         }
                         break;
                     }
@@ -108,15 +104,12 @@ public final class Snoopy extends JavaPlugin implements Listener {
 
                 Block block = ev.getBlockPlaced();
                 Material type = block.getType();
-                for (Map m : this.getConfig().getMapList("blocks")) {
-                    if (m.get("type") != null && m.get("type").equals(type.toString())) {
-                        if (!block.hasMetadata("snoopy_dontcount")) {
-                            block.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
-                        }
-                        break;
+
+                if (this.getConfig().getMapList("blocks").stream().anyMatch(m -> m.get("type") != null && m.get("type").equals(type.toString()))) { // If the block is set in the config
+                    if (!block.hasMetadata("snoopy_dontcount")) {
+                        block.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true)); // Give the block metadata to note that it was placed by a player
                     }
                 }
-
             }
         }
     }
