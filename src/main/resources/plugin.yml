@@ -10,7 +10,6 @@ commands:
   snoopy:
     description: Snoopy parent command
     usage: /snoopy
-    permission: snoopy.help
   snoopy reload:
     description: Reload the Snoopy config
     usage: /snoopy reload
@@ -36,6 +35,9 @@ permissions:
     default: op
   snoopy.help:
     description: Permission for the help command
+    default: true
+  snoopy.version:
+    description: Permission for the version command
     default: true
 
 

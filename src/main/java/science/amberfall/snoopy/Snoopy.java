@@ -1,166 +1,87 @@
 package science.amberfall.snoopy;
 
+import lombok.Getter;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import science.amberfall.snoopy.Command.SnoopyCommand;
+import science.amberfall.snoopy.EventHandler.BlockBreakHandler;
+import science.amberfall.snoopy.EventHandler.BlockPlaceHandler;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 
 public final class Snoopy extends JavaPlugin implements Listener {
+	@Getter private static Snoopy snoopy;
+	@Getter private SnoopyCommandManager commandManager;
 
-    @Override
-    public void onEnable() {
-        Bukkit.getPluginManager().registerEvents(this, this);
-        saveDefaultConfig();
-    }
+	@Override
+	public void onEnable() {
+		saveDefaultConfig();
 
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-    }
+		final File langFile = new File(getDataFolder(), "lang_en.yml");
+		InputStream langStream = getResource("lang_en.yml");
 
-    /**
-     * Find all the ores in a vein
-     *
-     * @param type      The type of ore to look for
-     * @param anchor    The originally mined block
-     * @param collected The HashSet to store the blocks in
-     */
-    private void getVein(Material type, Block anchor, HashSet<Block> collected) {
+		try {
+			FileUtils.copyInputStreamToFile(langStream, langFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				langStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
-        if (!anchor.getType().equals(type) || collected.contains(anchor)) return; // Break if already counted or wrong type of block
+		snoopy = this;
+		commandManager = new SnoopyCommandManager(this);
 
-        collected.add(anchor); // Add this block (anchor) to collected list.
+		Bukkit.getPluginManager().registerEvents(new BlockBreakHandler(this), this);
+		Bukkit.getPluginManager().registerEvents(new BlockPlaceHandler(this), this);
+		registerCommands();
+	}
 
-        // Mark as already counted with metadata
-        anchor.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
+	@Override
+	public void onDisable() {
+		commandManager.unregisterCommands();
+	}
 
-        // Move to adjacent block and repeat the procedure by using this same method (recursion)
-        getVein(type, anchor.getRelative(BlockFace.NORTH), collected);
-        getVein(type, anchor.getRelative(BlockFace.SOUTH), collected);
-        getVein(type, anchor.getRelative(BlockFace.EAST), collected);
-        getVein(type, anchor.getRelative(BlockFace.WEST), collected);
-        getVein(type, anchor.getRelative(BlockFace.UP), collected);
-        getVein(type, anchor.getRelative(BlockFace.DOWN), collected);
-    }
+	/**
+	 * Register commands for the plugin
+	 */
+	private void registerCommands() {
+		commandManager.registerCommand(new SnoopyCommand(this));
+	}
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent ev) {
-        if (!ev.isCancelled()) {
-            if (ev.isDropItems()) {
+	/**
+	 * Find all the ores in a vein
+	 *
+	 * @param type      The type of ore to look for
+	 * @param anchor    The originally mined block
+	 * @param collected The HashSet to store the blocks in
+	 */
+	public void getVein(Material type, Block anchor, HashSet<Block> collected) {
+		if (!anchor.getType().equals(type) || collected.contains(anchor))
+			return; // Break if already counted or wrong type of block
 
-                Player player = ev.getPlayer();
-                Block block = ev.getBlock();
-                Material type = block.getType();
-                Location location = block.getLocation();
+		// Add this block (anchor) to collected list.
+		collected.add(anchor);
 
-                for (Map m : this.getConfig().getMapList("blocks")) {
-                    if (m.get("type") != null && m.get("type").equals(type.toString())) {
-                        if (!block.hasMetadata("snoopy_dontcount")) {
+		// Mark as already counted with metadata
+		anchor.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
 
-                            HashSet<Block> vein = new HashSet<>();
-                            getVein(block.getType(), block, vein);
-                            int size = vein.size();
+		// Repeat this procedure for every adjacent block
+		final BlockFace[] blockFaces = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
 
-                            // Replace placeholders in the message format from the config with values
-                            String message = this.getConfig().getString("format")
-                                    .replace("{name}", player.getName())
-                                    .replace("{amount}", Integer.toString(vein.size()))
-                                    // If the vein is bigger than 1, pluralize the name of the ore
-                                    .replace("{type}", (String) m.get(size > 1 ? "pluralname" : "name"))
-                                    .replace("{location}", String.format("x: %s, y: %s, z: %s", location.getBlockX(), location.getBlockY(), location.getBlockZ()))
-                                    .replace("{light level}", Integer.toString(player.getLocation().getBlock().getLightLevel()));
-
-                            Bukkit.getOnlinePlayers().forEach(p -> {
-                                if (p.hasPermission("snoopy.getnotified")) {
-                                    p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-                                }
-                            });
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onBlockPlace(BlockPlaceEvent ev) {
-        if (!ev.isCancelled()) {
-            if (ev.canBuild()) {
-
-                Block block = ev.getBlockPlaced();
-                Material type = block.getType();
-
-                if (this.getConfig().getMapList("blocks").stream().anyMatch(m -> m.get("type") != null && m.get("type").equals(type.toString()))) { // If the block is set in the config
-                    if (!block.hasMetadata("snoopy_dontcount")) {
-                        block.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true)); // Give the block metadata to note that it was placed by a player
-                    }
-                }
-            }
-        }
-    }
-
-    private void sendHelp(CommandSender sender) {
-        sender.sendMessage(" ---- " + ChatColor.DARK_AQUA + "Snoopy Help" + ChatColor.RESET + " -- " + ChatColor.DARK_AQUA + "Page " + ChatColor.GRAY + "1" + ChatColor.DARK_AQUA + "/" + ChatColor.GRAY + "1" + ChatColor.RESET + " ----");
-        sender.sendMessage(ChatColor.DARK_AQUA + "/snoopy reload" + ChatColor.RESET + ": Reloads the configuration file.");
-        sender.sendMessage(ChatColor.DARK_AQUA + "/snoopy version" + ChatColor.RESET + ": Get the current version.");
-    }
-
-    private void sendNoAccess(CommandSender sender) {
-        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&3Snoopy&7] &rYou don't have access to that command!"));
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (label.equalsIgnoreCase("snoopy")) {
-            if (args.length == 0) {
-                sendHelp(sender);
-                return true;
-            } else {
-                if (args[0].toLowerCase().matches("(reload|rl)")) {
-                    if (sender.hasPermission("snoopy.reload")) {
-                        reloadConfig();
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&3Snoopy&7] &rConfiguration reloaded!"));
-                        return true;
-                    } else {
-                        sendNoAccess(sender);
-                        return true;
-                    }
-                } else if (args[0].toLowerCase().matches("(version|ver)")) {
-                    if (sender.hasPermission("snoopy.version")) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&3Snoopy&7] &rRunning version " + this.getDescription().getVersion()));
-                        return true;
-                    } else {
-                        sendNoAccess(sender);
-                        return true;
-                    }
-                } else if (args[0].toLowerCase().matches("(help|h)")) {
-                    if (sender.hasPermission("snoopy.help")) {
-                        sendHelp(sender);
-                        return true;
-                    } else {
-                        sendNoAccess(sender);
-                        return true;
-                    }
-                }
-                // If all else fails
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7[&3Snoopy&7] &rUnknown argument! See /snoopy help for more info."));
-            }
-        }
-        return true;
-    }
+		Arrays.stream(blockFaces).forEach(blockFace -> getVein(type, anchor.getRelative(blockFace), collected));
+	}
 }

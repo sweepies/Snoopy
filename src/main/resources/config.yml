@@ -1,17 +1,17 @@
-# The message format, acceptable placeholders are: {name} {amount} {type} {location} {light level}
-format: '&7[&3Snoopy&7] &3{name} found {amount} {type} at {location} (LL: {light level})'
+# Whether or not to include the Snoopy prefix in the notification message
+usePrefix: true
 
 # The blocks that will trigger the message, and their corresponding friendly and plural name
 blocks:
   -
     type: 'DIAMOND_ORE'
     name: 'diamond'
-    pluralname: 'diamonds'
+    pluralName: 'diamonds'
   -
     type: 'GOLD_ORE'
     name: 'gold'
-    pluralname: 'gold'
+    pluralName: 'gold'
   -
     type: 'EMERALD_ORE'
     name: 'emerald'
-    pluralname: 'emeralds'
+    pluralName: 'emeralds'
