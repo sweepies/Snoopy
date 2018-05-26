@@ -27,7 +27,7 @@ Every message in the plugin is configurable with templates. You could remove the
 | `snoopy.getnotified` | The permission to be notified when a vein is found. |
 
 # Downloading
-You can download the latest stable version from the [releases page](https://github.com/sweepyoface/Snoopy/releases)
+You can download the [latest version](https://github.com/sweepyoface/Snoopy/releases/latest) from the [releases page](https://github.com/sweepyoface/Snoopy/releases).
 
 Development builds are available on [Jenkins](https://ci.sweepy.pw/job/Snoopy/).
 
