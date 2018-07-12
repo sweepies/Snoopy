@@ -1,6 +1,9 @@
 # Whether or not to include the Snoopy prefix in the notification message
 usePrefix: true
 
+# Whether or not to send notifications to the console on top of in game
+notifyConsole: true
+
 # The blocks that will trigger the message, and their corresponding friendly and plural name
 blocks:
   -

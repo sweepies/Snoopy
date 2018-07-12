@@ -19,10 +19,12 @@ import java.util.Map;
 public class BlockBreakHandler implements Listener {
 	private Snoopy snoopy;
 	private SnoopyCommandManager snoopyCommandManager;
+	private boolean usePrefix;
 
 	public BlockBreakHandler(Snoopy snoopy) {
 		this.snoopy = snoopy;
 		this.snoopyCommandManager = snoopy.getCommandManager();
+		usePrefix = snoopy.getConfig().getBoolean("usePrefix", true);
 	}
 
 	@EventHandler
@@ -39,15 +41,15 @@ public class BlockBreakHandler implements Listener {
 				for (Map m : snoopy.getConfig().getMapList("blocks")) {
 
 					// Check if the mined block matches an ore defined, or has already been counted
-					if (m.get("type") == null || !m.get("type").equals(type.toString()) || block.hasMetadata("snoopy_dontcount")) continue;
+					if (m.get("type") == null || !m.get("type").equals(type.toString()) || block.hasMetadata("snoopy_dontcount"))
+						continue;
 
 					// Get the amount in the vein
-					HashSet<Block> vein = new HashSet<>();
-					snoopy.getVein(block.getType(), block, vein);
+					final HashSet<Block> vein = new HashSet<>();
+					Snoopy.getVein(block.getType(), block, vein);
 					final int veinSize = vein.size();
 
 					// Define variables to replace message placeholders with
-					final boolean usePrefix = snoopy.getConfig().getBoolean("usePrefix", false);
 					final String playerName = player.getName();
 					final String amount = Integer.toString(veinSize);
 					final String friendlyName = (String) m.get(veinSize > 1 ? "pluralName" : "name");
@@ -57,15 +59,16 @@ public class BlockBreakHandler implements Listener {
 					final String locationZ = Integer.toString(location.getBlockZ());
 					final String lightLevel = Integer.toString(player.getLocation().getBlock().getLightLevel());
 
-					// Send out notification messages
+					// Send notification messages
 					Bukkit.getOnlinePlayers().stream().filter(p -> p.hasPermission("snoopy.getnotified")).forEach(p -> {
 
-						final CommandIssuer issuer = snoopyCommandManager.getCommandIssuer(p);
-						final String messagePrefix = snoopyCommandManager.getLocales().getMessage(issuer, SnoopyMessageKeys.MESSAGE_PREFIX);
+						final CommandIssuer fauxIssuer = snoopyCommandManager.getCommandIssuer(p);
+						final String messagePrefix = snoopyCommandManager.getLocales().getMessage(fauxIssuer, SnoopyMessageKeys.MESSAGE_PREFIX);
 
 						// Send the notification replacing placeholders from the locale file
-						issuer.sendInfo(SnoopyMessageKeys.NOTIFY_MESSAGE_FORMAT,
-								"{prefix}", usePrefix ? messagePrefix : "", "{name}", playerName,
+						fauxIssuer.sendInfo(SnoopyMessageKeys.NOTIFY_MESSAGE_FORMAT,
+								"{prefix}", usePrefix ? messagePrefix : "",
+								"{name}", playerName,
 								"{amount}", amount,
 								"{friendly name}", friendlyName,
 								"{type}", blockType,
@@ -74,6 +77,23 @@ public class BlockBreakHandler implements Listener {
 								"{locZ}", locationZ,
 								"{light level}", lightLevel);
 					});
+
+					// Send console message
+					if (snoopy.getConfig().getBoolean("notifyConsole", true)) {
+						final CommandIssuer fauxConsoleIssuer = snoopyCommandManager.getCommandIssuer(Bukkit.getConsoleSender());
+						final String messagePrefix = snoopyCommandManager.getLocales().getMessage(fauxConsoleIssuer, SnoopyMessageKeys.MESSAGE_PREFIX);
+
+						fauxConsoleIssuer.sendInfo(SnoopyMessageKeys.NOTIFY_MESSAGE_FORMAT,
+								"{prefix}", usePrefix ? messagePrefix : "",
+								"{name}", playerName,
+								"{amount}", amount,
+								"{friendly name}", friendlyName,
+								"{type}", blockType,
+								"{locX}", locationX,
+								"{locY}", locationY,
+								"{locZ}", locationZ,
+								"{light level}", lightLevel);
+					}
 				}
 			}
 		}

@@ -28,7 +28,7 @@ public final class Snoopy extends JavaPlugin implements Listener {
 		saveDefaultConfig();
 
 		final File langFile = new File(getDataFolder(), "lang_en.yml");
-		InputStream langStream = getResource("lang_en.yml");
+		final InputStream langStream = getResource("lang_en.yml");
 
 		try {
 			FileUtils.copyInputStreamToFile(langStream, langFile);
@@ -69,7 +69,7 @@ public final class Snoopy extends JavaPlugin implements Listener {
 	 * @param anchor    The originally mined block
 	 * @param collected The HashSet to store the blocks in
 	 */
-	public void getVein(Material type, Block anchor, HashSet<Block> collected) {
+	public static void getVein(Material type, Block anchor, HashSet<Block> collected) {
 		if (!anchor.getType().equals(type) || collected.contains(anchor))
 			return; // Break if already counted or wrong type of block
 
@@ -77,7 +77,7 @@ public final class Snoopy extends JavaPlugin implements Listener {
 		collected.add(anchor);
 
 		// Mark as already counted with metadata
-		anchor.setMetadata("snoopy_dontcount", new FixedMetadataValue(this, true));
+		anchor.setMetadata("snoopy_dontcount", new FixedMetadataValue(Snoopy.getSnoopy(), true));
 
 		// Repeat this procedure for every adjacent block
 		final BlockFace[] blockFaces = {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
