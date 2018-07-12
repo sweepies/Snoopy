@@ -1,4 +1,4 @@
-![Snoopy](https://static.sweepy.pw/Snoopy/logo.png)
+![Snoopy](https://sweepyoface.github.io/Snoopy/logo.png)
 
 ![Build status](https://api.travis-ci.org/sweepyoface/Snoopy.svg?branch=master)
 [![Spigot](https://img.shields.io/badge/Spigot-Project%20Page-yellow.svg)](https://www.spigotmc.org/resources/snoopy.43288/)
