@@ -18,7 +18,7 @@ public class SnoopyCommandHelpFormatter extends CommandHelpFormatter {
 				"{commandprefix}", help.getCommandPrefix(),
 				// If the subcommand is "help" (since we only need one help page) or there are no paramaters, replace with nothing
 				// Otherwise, append a space to the parameters so we don't have to have extra whitespace for commands that have none
-				"{parameters}", entry.getCommand().split(" ")[1].equals("help") || entry.getParameters().length > 0 ? "" : entry.getParameterSyntax() + " ",
+				"{parameters}", entry.getCommand().split(" ")[0].equals("help") || entry.getParameters().length > 0 ? "" : entry.getParameterSyntax() + " ",
 				"{separator}", entry.getDescription().isEmpty() ? "" : "-",
 				"{description}", entry.getDescription()
 		};
