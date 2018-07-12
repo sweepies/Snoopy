@@ -23,14 +23,15 @@ public class BlockPlaceHandler implements Listener {
 				final Block block = ev.getBlockPlaced();
 				final Material type = block.getType();
 
-				// If the placed block matches one defined in the config
-				if (snoopy.getConfig().getMapList("blocks").stream().anyMatch(m -> m.get("type") != null && m.get("type").equals(type.toString()))) {
-					// If the block doesn't already have Snoopy metadaya
-					if (!block.hasMetadata("snoopy_dontcount")) {
-						// Give the block metadata to note that it was placed by a player
-						block.setMetadata("snoopy_dontcount", new FixedMetadataValue(snoopy, true));
-					}
-				}
+				// Check that the block matches one defined in the config
+				if (snoopy.getConfig().getMapList("blocks").stream().noneMatch(m -> m.get("type") != null && m.get("type").equals(type.toString())))
+					return;
+
+				// Check that the block doesn't already have Snoopy metadata
+				if (block.hasMetadata("snoopy_dontcount")) return;
+
+				// Give the block metadata to note that it was placed by a player
+				block.setMetadata("snoopy_dontcount", new FixedMetadataValue(snoopy, true));
 			}
 		}
 	}
