@@ -29,7 +29,7 @@ Every message in the plugin is configurable with templates. You could remove the
 # Downloading
 You can download the [latest version](https://github.com/sweepyoface/Snoopy/releases/latest) from the [releases page](https://github.com/sweepyoface/Snoopy/releases).
 
-Development builds are available on [Jenkins](https://ci.sweepy.pw/job/Snoopy/).
+Development builds are available on [Jenkins](https://ci.sweepy.pw/job/Snoopy/). (currently unavailable)
 
 # Compiling
 1. Install [Apache Maven](https://maven.apache.org/).
